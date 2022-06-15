@@ -20,15 +20,6 @@ type Server struct {
 	server *http.Server
 }
 
-type DbPostgresConfig struct {
-	Host     string
-	Port     string
-	Username string
-	Password string
-	DBName   string
-	SSLMode  string
-}
-
 func initLogger() {
 	logger := log.New()
 	logger.Out = os.Stdout
