@@ -41,6 +41,7 @@ func Inject() *gin.Engine {
 
 	connection := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
 		cfg.Host, cfg.Port, cfg.Username, cfg.DBName, cfg.Password, cfg.SSLMode)
+	log.Printf(connection)
 	db, err := sqlx.Open("postgres", connection)
 	if err != nil {
 		log.Fatalf(err.Error())
