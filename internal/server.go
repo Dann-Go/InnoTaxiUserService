@@ -2,7 +2,9 @@ package internal
 
 import (
 	"fmt"
+	"github.com/Dann-Go/InnoTaxiUserService/internal/config"
 	"github.com/Dann-Go/InnoTaxiUserService/internal/handler"
+	"github.com/Dann-Go/InnoTaxiUserService/internal/migrations"
 	"github.com/Dann-Go/InnoTaxiUserService/internal/repository"
 	"github.com/Dann-Go/InnoTaxiUserService/internal/service"
 	"github.com/gin-gonic/gin"
@@ -11,7 +13,6 @@ import (
 	log "github.com/sirupsen/logrus"
 	"net/http"
 	"os"
-	"strings"
 	"time"
 )
 
@@ -35,30 +36,8 @@ func initLogger() {
 	log.SetFormatter(&log.JSONFormatter{})
 }
 
-func envsCheck() {
-	requiredEnvs := []string{"HOST", "DBPORT", "USERNAME", "PASSWORD",
-		"DBNAME", "SSLMODE", "SERVPORT"}
-	var msg []string
-	for _, el := range requiredEnvs {
-		val, exists := os.LookupEnv(el)
-		if !exists || len(val) == 0 {
-			msg = append(msg, el)
-		}
-	}
-	if len(msg) > 0 {
-		log.Fatal(strings.Join(msg, ", "), " env(s) not set")
-	}
-}
-
 func Inject() *gin.Engine {
-	cfg := DbPostgresConfig{
-		Host:     os.Getenv("HOST"),
-		Port:     os.Getenv("DBPORT"),
-		Username: os.Getenv("USERNAME"),
-		Password: os.Getenv("PASSWORD"),
-		DBName:   os.Getenv("DBNAME"),
-		SSLMode:  os.Getenv("SSLMODE"),
-	}
+	cfg := config.NewDbConfig()
 
 	connection := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
 		cfg.Host, cfg.Port, cfg.Username, cfg.DBName, cfg.Password, cfg.SSLMode)
@@ -68,6 +47,12 @@ func Inject() *gin.Engine {
 	}
 
 	err = db.Ping()
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+
+	log.Printf("Start migrating database \n")
+	err = migrations.MigrationUp(db)
 	if err != nil {
 		log.Fatalf(err.Error())
 	}
@@ -88,7 +73,7 @@ func Inject() *gin.Engine {
 
 func (s *Server) Run(port string) error {
 	initLogger()
-	envsCheck()
+	config.EnvsCheck()
 
 	router := Inject()
 	s.server = &http.Server{
