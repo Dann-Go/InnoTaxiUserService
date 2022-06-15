@@ -7,7 +7,7 @@ import (
 
 type Authorization interface {
 	CreateUser(user *domain.User) (*domain.User, error)
-	GenerateToken(username, password string) (string, error)
+	GenerateToken(phone, password string) (string, error)
 	GetUserByPhone(phone string) (*domain.User, error)
 	ParseToken(token string) (int, error)
 }

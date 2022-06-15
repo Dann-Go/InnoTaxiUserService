@@ -10,7 +10,7 @@ services:
       POSTGRES_USER: "grimdan"
       POSTGRES_DB: "userservicedb"
     ports:
-      - "127.0.0.1:5432:5432"
+      - "127.0.0.1:5439:5432"
   web-app:
     restart: on-failure
     build:
