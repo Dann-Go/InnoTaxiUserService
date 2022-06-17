@@ -1,20 +1,29 @@
 package handler
 
 import (
+	_ "github.com/Dann-Go/InnoTaxiUserService/docs"
 	"github.com/Dann-Go/InnoTaxiUserService/internal/service"
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 type Handler struct {
-	services *service.Service
+	userService       *service.UserService
+	middlewareService *service.AuthorizationService
 }
 
-func NewHandler(services *service.Service) *Handler {
-	return &Handler{services: services}
+func NewHandler(userService *service.UserService, authorizationService *service.AuthorizationService) *Handler {
+	return &Handler{
+		userService:       userService,
+		middlewareService: authorizationService,
+	}
 }
 
 func (h *Handler) InitRoutes() *gin.Engine {
 	router := gin.New()
+
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	auth := router.Group("/auth")
 	{

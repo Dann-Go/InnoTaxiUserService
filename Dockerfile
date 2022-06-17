@@ -4,6 +4,9 @@ WORKDIR /app
 
 ADD . ./
 RUN go mod download
+RUN go mod tidy
+RUN go mod vendor
+
 RUN go build -o /app/userservice ./cmd
 
 

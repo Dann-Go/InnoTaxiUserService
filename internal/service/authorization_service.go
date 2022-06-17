@@ -2,16 +2,31 @@ package service
 
 import (
 	"errors"
-	"github.com/Dann-Go/InnoTaxiUserService/internal/domain"
+	"os"
+	"strconv"
+	"time"
+
 	"github.com/Dann-Go/InnoTaxiUserService/internal/repository"
 	"github.com/dgrijalva/jwt-go"
 	"golang.org/x/crypto/bcrypt"
-	"time"
 )
 
-const (
-	signingKey = "grk#iwoerjn%324lskdfnHsdj3skldf"
-	tokenTTL   = 48 * time.Hour
+type Authorization interface {
+	GenerateToken(phone, password string) (string, error)
+	ParseToken(accessToken string) (int, error)
+}
+
+type AuthorizationService struct {
+	repo *repository.UserRepository
+}
+
+func NewAuthorizationService(repo *repository.UserRepository) *AuthorizationService {
+	return &AuthorizationService{repo: repo}
+}
+
+var (
+	signingKey  = os.Getenv("SIGNINKEY")
+	tokenTTL, _ = strconv.Atoi(os.Getenv("TOKENTTL"))
 )
 
 type tokenClaims struct {
@@ -19,29 +34,19 @@ type tokenClaims struct {
 	UserId int `json:"userId"`
 }
 
-type AuthService struct {
-	repo repository.Authorization
-}
-
-func (s *AuthService) CreateUser(user *domain.User) (*domain.User, error) {
-	user.PasswordHash = hashPassword(user.PasswordHash)
-
-	return s.repo.CreateUser(user)
-}
-
-func (s *AuthService) GenerateToken(phone, password string) (string, error) {
-	user, err := s.repo.GetUserByPhone(phone)
+func (ms *AuthorizationService) GenerateToken(phone, password string) (string, error) {
+	user, err := ms.repo.GetUserByPhone(phone)
 	if err != nil {
 		return "", err
 	}
 	if isValid := checkPasswordHash(password, user.PasswordHash); !isValid {
-		err := errors.New("Wrong Password")
+		err := errors.New("wrong password")
 		return "", err
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &tokenClaims{
 		jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(tokenTTL).Unix(),
+			ExpiresAt: time.Now().Add(time.Duration(tokenTTL) * time.Hour).Unix(),
 			IssuedAt:  time.Now().Unix(),
 		},
 		user.ID,
@@ -50,16 +55,7 @@ func (s *AuthService) GenerateToken(phone, password string) (string, error) {
 	return token.SignedString([]byte(signingKey))
 }
 
-func (s *AuthService) GetUserByPhone(phone string) (*domain.User, error) {
-	user, err := s.repo.GetUserByPhone(phone)
-	if err != nil {
-		return nil, err
-	}
-
-	return user, err
-}
-
-func (s *AuthService) ParseToken(accessToken string) (int, error) {
+func (ms *AuthorizationService) ParseToken(accessToken string) (int, error) {
 	token, err := jwt.ParseWithClaims(accessToken, &tokenClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("invalid signing method")
@@ -78,11 +74,7 @@ func (s *AuthService) ParseToken(accessToken string) (int, error) {
 	return claims.UserId, err
 }
 
-func NewAuthService(repo repository.Authorization) *AuthService {
-	return &AuthService{repo: repo}
-}
-
-func hashPassword(password string) string {
+func HashPassword(password string) string {
 	bytes, _ := bcrypt.GenerateFromPassword([]byte(password), 14)
 	return string(bytes)
 }
