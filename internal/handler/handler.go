@@ -9,14 +9,14 @@ import (
 )
 
 type Handler struct {
-	userService       *service.UserService
-	middlewareService *service.AuthorizationService
+	userService         *service.UserService
+	authariztionService *service.AuthorizationService
 }
 
 func NewHandler(userService *service.UserService, authorizationService *service.AuthorizationService) *Handler {
 	return &Handler{
-		userService:       userService,
-		middlewareService: authorizationService,
+		userService:         userService,
+		authariztionService: authorizationService,
 	}
 }
 
