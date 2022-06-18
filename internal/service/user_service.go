@@ -9,9 +9,8 @@ import (
 
 type User interface {
 	CreateUser(user *domain.User) (*domain.UserResponse, error)
-	GenerateToken(phone, password string) (string, error)
 	GetUserByPhone(phone string) (*domain.User, error)
-	ParseToken(token string) (int, error)
+	GetUserByEmail(email string) (*domain.User, error)
 }
 
 type UserService struct {

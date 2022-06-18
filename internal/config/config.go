@@ -31,7 +31,7 @@ func NewDbConfig() *DbPostgresConfig {
 
 func EnvsCheck() error {
 	requiredEnvs := []string{"HOST", "DBPORT", "USERNAME", "PASSWORD",
-		"DBNAME", "SSLMODE", "SERVPORT"}
+		"DBNAME", "SSLMODE", "SERVPORT", "TOKENTTL", "SIGNINGKEY"}
 	var msg []string
 	for _, el := range requiredEnvs {
 		val, exists := os.LookupEnv(el)

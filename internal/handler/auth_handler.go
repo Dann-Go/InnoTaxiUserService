@@ -33,7 +33,7 @@ func (h *Handler) signUp(c *gin.Context) {
 		return
 	}
 
-	token, err := h.authariztionService.GenerateToken(json.Phone, simplePassword)
+	token, err := h.authorizationService.GenerateToken(json.Phone, simplePassword)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, responses.NewServerError(err.Error()))
 		return
@@ -68,7 +68,7 @@ func (h *Handler) signIn(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, responses.NewServerError(err.Error()))
 		return
 	}
-	token, err := h.authariztionService.GenerateToken(json.Phone, json.PasswordHash)
+	token, err := h.authorizationService.GenerateToken(json.Phone, json.PasswordHash)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, responses.NewServerError(err.Error()))
 		return
