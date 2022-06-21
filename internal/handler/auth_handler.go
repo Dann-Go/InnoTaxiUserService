@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"github.com/Dann-Go/InnoTaxiUserService/internal/domain/apperrors"
 	"net/http"
 
 	"github.com/Dann-Go/InnoTaxiUserService/internal/domain"
@@ -23,19 +24,19 @@ import (
 func (h *Handler) signUp(c *gin.Context) {
 	json := domain.User{}
 	if err := c.ShouldBindJSON(&json); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, responses.NewServerResponse(false, err.Error()))
+		apperrors.ErrorResponse(c, apperrors.Wrapper(apperrors.ErrBadRequest, err))
 		return
 	}
 	simplePassword := json.PasswordHash
 	user, err := h.userService.CreateUser(&json)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, responses.NewServerResponse(false, err.Error()))
+		apperrors.ErrorResponse(c, err)
 		return
 	}
 
 	token, err := h.authorizationService.GenerateToken(json.Phone, simplePassword)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, responses.NewServerResponse(false, err.Error()))
+		apperrors.ErrorResponse(c, err)
 		return
 	}
 
@@ -65,18 +66,18 @@ type signInInput struct {
 func (h *Handler) signIn(c *gin.Context) {
 	json := signInInput{}
 	if err := c.ShouldBindJSON(&json); err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, responses.NewServerResponse(false, err.Error()))
+		apperrors.ErrorResponse(c, apperrors.Wrapper(apperrors.ErrBadRequest, err))
 		return
 	}
 	token, err := h.authorizationService.GenerateToken(json.Phone, json.PasswordHash)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, responses.NewServerResponse(false, err.Error()))
+		apperrors.ErrorResponse(c, err)
 		return
 	}
 
 	userFull, err := h.userService.GetUserByPhone(json.Phone)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, responses.NewServerResponse(false, err.Error()))
+		apperrors.ErrorResponse(c, err)
 		return
 	}
 	userResponse := domain.UserResponse{

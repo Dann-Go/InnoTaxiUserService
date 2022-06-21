@@ -2,7 +2,8 @@ package service
 
 import (
 	"errors"
-	"os"
+	"github.com/Dann-Go/InnoTaxiUserService/internal/config"
+	"github.com/Dann-Go/InnoTaxiUserService/internal/domain/apperrors"
 	"strconv"
 	"time"
 
@@ -24,10 +25,7 @@ func NewAuthorizationService(repo *repository.UserRepository) *AuthorizationServ
 	return &AuthorizationService{repo: repo}
 }
 
-var (
-	signingKey  = os.Getenv("SIGNINKEY")
-	tokenTTL, _ = strconv.Atoi(os.Getenv("TOKENTTL"))
-)
+var authCfg = config.NewAuthConfig()
 
 type tokenClaims struct {
 	jwt.StandardClaims
@@ -40,10 +38,10 @@ func (ms *AuthorizationService) GenerateToken(phone, password string) (string, e
 		return "", err
 	}
 	if isValid := checkPasswordHash(password, user.PasswordHash); !isValid {
-		err := errors.New("wrong password")
+		err := apperrors.Wrapper(apperrors.ErrWrongPassword, err)
 		return "", err
 	}
-
+	tokenTTL, _ := strconv.Atoi(authCfg.TokenTTL)
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &tokenClaims{
 		jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Duration(tokenTTL) * time.Hour).Unix(),
@@ -52,15 +50,15 @@ func (ms *AuthorizationService) GenerateToken(phone, password string) (string, e
 		user.ID,
 	})
 
-	return token.SignedString([]byte(signingKey))
+	return token.SignedString([]byte(authCfg.SigningKey))
 }
 
 func (ms *AuthorizationService) ParseToken(accessToken string) (int, error) {
 	token, err := jwt.ParseWithClaims(accessToken, &tokenClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, errors.New("invalid signing method")
+			return nil, apperrors.Wrapper(apperrors.ErrInvaildSigningMethod, errors.New("invalid signing method"))
 		}
-		return []byte(signingKey), nil
+		return []byte(authCfg.SigningKey), nil
 	})
 	if err != nil {
 		return 0, err
@@ -68,7 +66,7 @@ func (ms *AuthorizationService) ParseToken(accessToken string) (int, error) {
 
 	claims, ok := token.Claims.(*tokenClaims)
 	if !ok {
-		return 0, errors.New("token claims are not of type *tokenClaims")
+		return 0, apperrors.Wrapper(apperrors.ErrWrongTokenClaims, errors.New("wrong token claims"))
 	}
 
 	return claims.UserId, err

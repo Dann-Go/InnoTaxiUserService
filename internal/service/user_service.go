@@ -1,9 +1,8 @@
 package service
 
 import (
-	"errors"
-
 	"github.com/Dann-Go/InnoTaxiUserService/internal/domain"
+	"github.com/Dann-Go/InnoTaxiUserService/internal/domain/apperrors"
 	"github.com/Dann-Go/InnoTaxiUserService/internal/repository"
 )
 
@@ -20,11 +19,11 @@ type UserService struct {
 func (s *UserService) CreateUser(user *domain.User) (*domain.UserResponse, error) {
 	user.PasswordHash = HashPassword(user.PasswordHash)
 
-	if userCheck, _ := s.repo.GetUserByPhone(user.Phone); userCheck.Phone != "" {
-		return nil, errors.New("user with such phone already exists")
+	if userCheck, err := s.repo.GetUserByPhone(user.Phone); userCheck.Phone != "" {
+		return nil, apperrors.Wrapper(apperrors.ErrPhoneIsAlreadyTaken, err)
 
-	} else if userCheck, _ := s.repo.GetUserByEmail(user.Email); userCheck.Email != "" {
-		return nil, errors.New("user with such email already exists")
+	} else if userCheck, err = s.repo.GetUserByEmail(user.Email); userCheck.Email != "" {
+		return nil, apperrors.Wrapper(apperrors.ErrEmailIsAlreadyTaken, err)
 	}
 
 	return s.repo.CreateUser(user)

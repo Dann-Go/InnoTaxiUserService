@@ -29,10 +29,10 @@ func initLogger() {
 }
 
 func Inject() (*gin.Engine, error) {
-	cfg := config.NewDbConfig()
+	dbConfig := config.NewDbConfig()
 
 	connection := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
-		cfg.Host, cfg.Port, cfg.Username, cfg.DBName, cfg.Password, cfg.SSLMode)
+		dbConfig.Host, dbConfig.Port, dbConfig.Username, dbConfig.DBName, dbConfig.Password, dbConfig.SSLMode)
 	log.Printf(connection)
 	db, err := sqlx.Open("postgres", connection)
 	if err != nil {

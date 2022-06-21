@@ -1,8 +1,6 @@
 package main
 
 import (
-	"os"
-
 	"github.com/Dann-Go/InnoTaxiUserService/internal/config"
 
 	"github.com/Dann-Go/InnoTaxiUserService/internal"
@@ -18,11 +16,12 @@ import (
 
 func main() {
 	err := config.EnvsCheck()
+	serverCfg := config.NewServerConfig()
 	if err != nil {
 		log.Fatalf("envs are not set %s", err.Error())
 	}
 	server := new(internal.Server)
-	if err := server.Run(os.Getenv("SERVPORT")); err != nil {
+	if err := server.Run(serverCfg.Port); err != nil {
 		log.Fatalf("error while running server %s", err.Error())
 	}
 }
