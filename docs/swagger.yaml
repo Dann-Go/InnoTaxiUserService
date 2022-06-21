@@ -1,0 +1,113 @@
+basePath: /
+definitions:
+  domain.User:
+    properties:
+      email:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      passwordHash:
+        type: string
+      phone:
+        type: string
+      rating:
+        type: number
+    required:
+    - email
+    - passwordHash
+    - phone
+    type: object
+  handler.signInInput:
+    properties:
+      passwordHash:
+        type: string
+      phone:
+        type: string
+    required:
+    - passwordHash
+    - phone
+    type: object
+  responses.ServerResponse:
+    properties:
+      msg: {}
+      success:
+        type: boolean
+    type: object
+host: localhost:8000
+info:
+  contact: {}
+  description: This is a user microservice for InnoTaxi App.
+  title: InnoTaxi User Microservice
+  version: "1.0"
+paths:
+  /auth/sign-in:
+    post:
+      consumes:
+      - application/json
+      description: Check if user exists and generate token
+      parameters:
+      - description: User signIN info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/handler.signInInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.ServerResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/responses.ServerResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/responses.ServerResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responses.ServerResponse'
+      summary: SignIn
+      tags:
+      - auth
+  /auth/sign-up:
+    post:
+      consumes:
+      - application/json
+      description: create user
+      parameters:
+      - description: User info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/domain.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.ServerResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/responses.ServerResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/responses.ServerResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responses.ServerResponse'
+      summary: SignUp
+      tags:
+      - auth
+swagger: "2.0"
