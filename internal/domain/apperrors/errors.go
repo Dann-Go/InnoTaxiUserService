@@ -19,7 +19,7 @@ var (
 	ErrUserNotFound         = errors.New("user not found")
 	ErrTokenInvalid         = errors.New("invalid token")
 	ErrWrongPassword        = errors.New("wrong password")
-	ErrInvaildSigningMethod = errors.New("invalid signing method")
+	ErrInvalidSigningMethod = errors.New("invalid signing method")
 	ErrWrongTokenClaims     = errors.New("token claims are not of type *tokenClaims")
 )
 
@@ -78,7 +78,7 @@ func newErrorResponse(err error) HTTPError {
 	case errors.Is(err, ErrWrongPassword):
 		httpErr.Message = err.Error()
 		httpErr.StatusCode = http.StatusBadRequest
-	case errors.Is(err, ErrInvaildSigningMethod):
+	case errors.Is(err, ErrInvalidSigningMethod):
 		httpErr.Message = err.Error()
 		httpErr.StatusCode = http.StatusBadRequest
 	case errors.Is(err, ErrWrongTokenClaims):

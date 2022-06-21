@@ -2,10 +2,11 @@ package service
 
 import (
 	"errors"
-	"github.com/Dann-Go/InnoTaxiUserService/internal/config"
-	"github.com/Dann-Go/InnoTaxiUserService/internal/domain/apperrors"
 	"strconv"
 	"time"
+
+	"github.com/Dann-Go/InnoTaxiUserService/internal/config"
+	"github.com/Dann-Go/InnoTaxiUserService/internal/domain/apperrors"
 
 	"github.com/Dann-Go/InnoTaxiUserService/internal/repository"
 	"github.com/dgrijalva/jwt-go"
@@ -56,7 +57,7 @@ func (ms *AuthorizationService) GenerateToken(phone, password string) (string, e
 func (ms *AuthorizationService) ParseToken(accessToken string) (int, error) {
 	token, err := jwt.ParseWithClaims(accessToken, &tokenClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, apperrors.Wrapper(apperrors.ErrInvaildSigningMethod, errors.New("invalid signing method"))
+			return nil, apperrors.Wrapper(apperrors.ErrInvalidSigningMethod, errors.New("invalid signing method"))
 		}
 		return []byte(authCfg.SigningKey), nil
 	})

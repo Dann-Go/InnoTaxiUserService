@@ -1,8 +1,9 @@
 package handler
 
 import (
-	"github.com/Dann-Go/InnoTaxiUserService/internal/domain/apperrors"
 	"net/http"
+
+	"github.com/Dann-Go/InnoTaxiUserService/internal/domain/apperrors"
 
 	"github.com/Dann-Go/InnoTaxiUserService/internal/domain"
 	"github.com/Dann-Go/InnoTaxiUserService/internal/domain/responses"
